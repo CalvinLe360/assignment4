@@ -1,0 +1,11 @@
+Run Time: 2792
+Run Time: 2858
+Run Time: 2915
+Run Time: 2998
+Run Time: 3007
+Run Time: 2913
+Run Time: 2982
+Run Time: 3208
+Run Time: 2900
+Run Time: 2888
+Run Time: 2950
