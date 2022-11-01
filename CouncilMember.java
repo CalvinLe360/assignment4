@@ -1359,5 +1359,95 @@ public class CouncilMember implements Runnable{
                  memberList.get(i).shutDownServer(); 
             }
         }
+
+        // test case 14: 3 Proposers propose at the same time, different values
+        // 0.5 seconds after, randomly select 50% of members to go offline
+        // members that crash are then brought back immediately
+        if(args[0].equals("testing") && args[1].equals("14")){
+            String[] responseTimes = {
+                "Medium",
+                "Medium",
+                "Immediate",
+                "Never",
+                "Immediate",
+                "Medium",
+                "Medium",
+                "Immediate",
+                "Immediate",
+                "Immediate",
+                "Medium",
+                "Late",
+                "Immediate",
+                "Medium",
+                "Medium",
+                "Immediate",
+                "Medium",
+                "Late",
+                "Immediate",
+                "Late",
+            };
+            int memberCount = 20;
+
+            ArrayList<String> serverSocketInfo = new ArrayList<String>(); 
+            ArrayList<CouncilMember> memberList = new ArrayList<CouncilMember>(); 
+            for(int i = 1; i <= memberCount; i++){
+                String hostname = "localhost"; 
+                String port = Integer.toString(STARTING_PORT + i); 
+                String socketInfo = hostname + ":" + port; 
+                serverSocketInfo.add(socketInfo); 
+            }
+            for(int i = 0; i < memberCount; i++) {
+                CouncilMember newMember = new CouncilMember(responseTimes[i % responseTimes.length], serverSocketInfo);
+                memberList.add(newMember);
+            }
+            Collections.shuffle(memberList);
+
+            // 3 Proposers propose at the same time
+            ArrayList<Thread> memberThreads = new ArrayList<Thread>();
+            for(int i = 0; i < 3; i++) {
+                memberList.get(i).setChosenValue(String.valueOf(1980 + i));
+                Thread memberProposal = new Thread(memberList.get(i));
+                memberThreads.add(memberProposal);
+                memberProposal.start();
+            }
+
+            // 50% of members go offline after 0.5 seconds
+            try{
+                Thread.sleep(500); 
+            }
+            catch(Exception e){
+
+            }
+
+            Collections.shuffle(memberList);
+            for(int i = 0; i < memberList.size() / 2; i++){
+                memberList.get(i).shutDownServer(); 
+                memberList.get(i).reRunMemberServer(); 
+            }
+            System.out.println("Kill 50% of members in the protocol."); 
+            
+            System.out.println("All the members in the protocol go back online."); 
+            try{
+                for (Thread memberThread : memberThreads) {
+                    memberThread.join();
+                }
+            }
+            catch(Exception e){
+
+            }
+            writeOutputToTestFile(memberList, "Testing/TestCase14Output.txt"); 
+            // wait for 2 seconds to make sure all the printing information has been completed 
+            try{
+                Thread.sleep(2000); 
+            }
+            catch(Exception e){
+
+            }
+            // shut down all the server of members from this test case
+            // so that the next test case can be run
+            for(int i = 0; i < memberList.size(); i++){
+                memberList.get(i).shutDownServer(); 
+            }
+        }
     }
 }
